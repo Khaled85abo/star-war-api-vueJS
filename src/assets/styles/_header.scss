@@ -1,0 +1,16 @@
+header {
+  background-image: url('~@/assets/header-background.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  min-height: 30vh;
+  display: flex;
+  align-items: center;
+}
+header > p {
+  text-transform: uppercase;
+  color: var(--yellow);
+  font-size: 2rem;
+  padding-left: 3rem;
+  letter-spacing: 0.9rem;
+  max-width: 40%;
+}
