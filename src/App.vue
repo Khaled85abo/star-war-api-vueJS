@@ -10,7 +10,7 @@
           <Spinner v-if="showListSpinner"/>
 
           <ul v-else>
-          <li v-for="(char, i) in people[page]" v-bind:key='i' v-on:click="renderCharInfo(char)">{{char.name}}</li>
+          <li v-for="(char, i) in list" v-bind:key='i' v-on:click="renderCharInfo(char)">{{char.name}}</li>
           </ul>
           <div class="page-controller">
             <button class="back-btn" v-bind:disabled="!previousPage" v-on:click="handlePreviousPage">◀</button>
@@ -104,6 +104,7 @@ export default {
       showCharacterSpinner: false, 
       showExtraInfoSpinner: false,
       people: {},
+      list : [],
       vehicles: {},
       species: {},
       planets: {},
@@ -139,8 +140,8 @@ export default {
         }
         this.people[page] = data.results
         this.showListSpinner = false
+        this.list = data.results
         console.log('data',data)
-        console.log('people',this.people)
     },
     renderCharInfo(char){
       this.singleChar = char
@@ -162,14 +163,20 @@ export default {
 
     handleNextPage: function(){
       this.page++
-      if(!this.planets[this.page]){
+      console.log(this.people[this.page])
+      if(this.people[this.page]){
+        this.list = this.people[this.page]
+      } else {
         this.fetchPeople(this.page)
       }
       this.checkBtns()
     },
     handlePreviousPage(){
+       console.log(this.people[this.page])
       this.page--
-      if(!this.planets[this.page]){
+      if(this.people[this.page]){
+        this.list = this.people[this.page]
+      } else {
         this.fetchPeople(this.page)
       }
       this.checkBtns()
