@@ -10,7 +10,11 @@
           <Spinner v-if="showListSpinner"/>
 
           <ul v-else>
-          <li v-for="(char, i) in list" v-bind:key='i' v-on:click="renderCharInfo(char)">{{char.name}}</li>
+          <li 
+          v-for="(char, i) in list" 
+          v-bind:key='i' 
+          v-on:click="renderCharInfo(char)">{{char.name}}
+          </li>
           </ul>
           <div class="page-controller">
             <button class="back-btn" v-bind:disabled="!previousPage" v-on:click="handlePreviousPage">◀</button>
@@ -30,46 +34,28 @@
             v-bind:char='singleChar'
           />
           </div>
-  
           <section class="extra-info">
-            <div class="btns">
-              <input
-                type="radio"
-                id="radio-1"
-                name="tabs"
-                data-type="planet"
-                checked
-              />
-              <label for="radio-1" class="tab">Planet</label>
-              <input
-                type="radio"
-                id="radio-2"
-                name="tabs"
-                data-type="species"
-              />
-              <label for="radio-2" class="tab">Species</label>
-              <input
-                type="radio"
-                id="radio-3"
-                name="tabs"
-                data-type="vehicles"
-              />
-              <label for="radio-3" class="tab">Vehicles</label>
-              <input
-                type="radio"
-                id="radio-4"
-                name="tabs"
-                data-type="starships"
-              />
-              <label for="radio-4" class="tab">Starships</label>
-            </div>
-
+            <ExtraInfoBtns 
+             v-bind:renderExtraInfo="renderExtraInfo"
+            />
             <Spinner v-if="showExtraInfoSpinner" />
             <div class="article" v-else>
-            <PlanetTemplate  
-              v-if="singlePlanet"
-              v-bind:planet="singlePlanet"
-            />
+              <PlanetTemplate  
+                v-if="singlePlanet && extraInfoType ==='planet'"
+                v-bind:planet="singlePlanet"
+              />
+              <SpeciesTemplate  
+                v-if="speciesArray.length > 0 && extraInfoType ==='species'"
+                v-bind:species="speciesArray"
+              />
+              <VehiclesTemplate  
+                v-if="vehiclesArray.length > 0 && extraInfoType ==='vehicles'"
+                v-bind:vehicles="vehiclesArray"
+              />
+              <StarshipsTemplate  
+                v-if="starshipsArray.length > 0 && extraInfoType ==='starships'"
+                v-bind:starships="starshipsArray"
+              />
             </div>
           </section>
         </aside>
@@ -89,24 +75,37 @@
 <script>
 import RobotSvg from '@/components/RobotSvg.vue'
 import Spinner from '@/components/Spinner.vue'
+import ExtraInfoBtns from '@/components/ExtraInfoBtns.vue'
 import CharTemplate from '@/components/templates/Character.vue'
 import PlanetTemplate from '@/components/templates/Planet.vue'
+import SpeciesTemplate from '@/components/templates/Species.vue'
+import StarshipsTemplate from '@/components/templates/Starships.vue'
+import VehiclesTemplate from '@/components/templates/Vehicles.vue'
 export default {
   components: {
     RobotSvg,
     Spinner,
+    ExtraInfoBtns,
     CharTemplate,
-    PlanetTemplate
+    PlanetTemplate,
+    SpeciesTemplate,
+    StarshipsTemplate,
+    VehiclesTemplate
   },
   data(){
     return {
       showListSpinner: true,
       showCharacterSpinner: false, 
       showExtraInfoSpinner: false,
+      extraInfoType: 'planet',
       people: {},
       list : [],
       vehicles: {},
+      vehiclesArray: [],
       species: {},
+      speciesArray: [],
+      starships: {},
+      starshipsArray: [],
       planets: {},
       totalOfPages: null ,
       singleChar: null,
@@ -118,18 +117,6 @@ export default {
       baseUrl: "https://swapi.dev/api/",
     }
   },
-  // computed: {
-  //   disableBtn(){
-  //     if(this.page == 1){
-  //       this.previousPage = false
-  //       this.nextPage = true
-  //     }
-  //     if(this.page == totalOfPages){
-  //       this.previousPage = true
-  //       this.nextPage = false
-  //     }
-  //   }
-  // },
   methods: {
     fetchPeople: async function(page){
         const fetchedData = await fetch(`${this.baseUrl}/people/?page=${page}`)
@@ -144,22 +131,13 @@ export default {
         console.log('data',data)
     },
     renderCharInfo(char){
+      this.showExtraInfoSpinner = true
       this.singleChar = char
-      const planetNum = this.getNum(char.homeworld)
-      if(this.planets[planetNum]){
-        this.singlePlanet = this.planets[planetNum]
-      } else {
-      this.fetchPlanet(char.homeworld)
-      }
+      this.renderExtraInfo('planet')
+      // this.fetchPlanet(char.homeworld)
     },
 
-   async fetchPlanet(url){
-      const fetchedData = await fetch(url)
-      const data = await fetchedData.json()
-      const planetNum = this.getNum(url)
-      this.planets[planetNum] = data
-      this.singlePlanet = data
-    },
+
 
     handleNextPage: function(){
       this.page++
@@ -193,10 +171,90 @@ export default {
         this.nextPage = true
       }
     },
-    getNum: function(url){
-        const splittedUrl = url.split('/')
-        const filteredUrl = splittedUrl.filter(el=> Number.isInteger(+el) && el !== '')
-        return Number(filteredUrl[0])
+    renderExtraInfo(type){
+      if(!this.singleChar){
+        return
+      }
+      const info = this.singleChar[type]
+      switch (type) {
+        case 'planet':
+          this.fetchPlanet(this.singleChar.homeworld)
+          break;
+        case 'vehicles':
+           this.getVehicles(info)
+          break;
+        case 'starships':
+           this.getStarships(info)
+          break;
+        case 'species':
+           this.getSpecies(info)
+          break;
+      }
+      this.extraInfoType = type
+    },
+   async fetchPlanet(url){
+      const planetNum = this.getNum(url)
+      if(this.planets[planetNum]){
+        this.singlePlanet = this.planets[planetNum]
+      } else {     
+      const fetchedData = await fetch(url)
+      const data = await fetchedData.json()
+      this.planets[planetNum] = data
+      this.singlePlanet = data
+       }
+      this.showExtraInfoSpinner = false
+    },
+   async getVehicles(urls){
+      let output = []
+      for(let url of urls){
+          let vehicle = {}
+          let vehicleNum = this.getNum(url)
+          if(this.vehicles[vehicleNum]){
+            vehicle = this.vehicles[vehicleNum]
+          } else {
+            const fetchedData = await fetch(`https://swapi.dev/api/vehicles/${vehicleNum}/`)
+            vehicle = await fetchedData.json()
+          }
+            output.push(vehicle)
+            this.vehicles[vehicleNum] = vehicle
+      }
+       this.vehiclesArray = output
+    },
+   async getSpecies(urls){
+      let output = []
+      for(let url of urls){
+          let specie = {}
+          const specieNum = this.getNum(url)
+          if(this.species[specieNum]){
+            specie = this.species[specieNum]
+          } else {
+            const fetchedData = await fetch(`https://swapi.dev/api/species/${specieNum}/`)
+            specie = await fetchedData.json()
+          }
+            output.push(specie)
+      }
+      this.speciesArray = output
+    },
+   async getStarships(urls){
+      let output = []
+      for(let url of urls){
+          let starship = {}
+          const starshipNum = this.getNum(url)
+          if(this.starships[starshipNum]){
+            starship = this.starships[starshipNum]
+          } else {
+            const fetchedData = await fetch(`https://swapi.dev/api/starships/${starshipNum}/`)
+            starship = await fetchedData.json()
+            this.starships[starshipNum] = starship
+          }
+            output.push(starship)
+      }
+       this.starshipsArray = output
+    },
+      getNum: function(url){
+      const splittedUrl = url.split('/')
+      const filteredUrl = splittedUrl.filter(el=> Number.isInteger(+el) && el !== '')
+      return Number(filteredUrl[0])
     }
   },
   mounted(){
