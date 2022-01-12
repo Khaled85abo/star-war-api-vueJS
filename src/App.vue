@@ -13,7 +13,9 @@
           <li 
           v-for="(char, i) in list" 
           v-bind:key='i' 
-          v-on:click="renderCharInfo(char)">{{char.name}}
+          v-on:click="renderCharInfo(char)"
+          >
+          {{char.name}}
           </li>
           </ul>
           <div class="page-controller">
@@ -94,6 +96,7 @@ export default {
   },
   data(){
     return {
+      active: true,
       showListSpinner: true,
       showCharacterSpinner: false, 
       showExtraInfoSpinner: false,
@@ -130,11 +133,11 @@ export default {
         this.list = data.results
         console.log('data',data)
     },
+
+
     renderCharInfo(char){
-      this.showExtraInfoSpinner = true
       this.singleChar = char
       this.renderExtraInfo('planet')
-      // this.fetchPlanet(char.homeworld)
     },
 
 
@@ -175,6 +178,8 @@ export default {
       if(!this.singleChar){
         return
       }
+      this.showExtraInfoSpinner = true
+
       const info = this.singleChar[type]
       switch (type) {
         case 'planet':
@@ -191,8 +196,10 @@ export default {
           break;
       }
       this.extraInfoType = type
+      // this.showExtraInfoSpinner = false
     },
    async fetchPlanet(url){
+   
       const planetNum = this.getNum(url)
       if(this.planets[planetNum]){
         this.singlePlanet = this.planets[planetNum]
@@ -201,8 +208,9 @@ export default {
       const data = await fetchedData.json()
       this.planets[planetNum] = data
       this.singlePlanet = data
-       }
+      }
       this.showExtraInfoSpinner = false
+
     },
    async getVehicles(urls){
       let output = []
@@ -219,6 +227,7 @@ export default {
             this.vehicles[vehicleNum] = vehicle
       }
        this.vehiclesArray = output
+       this.showExtraInfoSpinner = false
     },
    async getSpecies(urls){
       let output = []
@@ -232,8 +241,11 @@ export default {
             specie = await fetchedData.json()
           }
             output.push(specie)
+            
+
       }
       this.speciesArray = output
+      this.showExtraInfoSpinner = false
     },
    async getStarships(urls){
       let output = []
@@ -250,6 +262,7 @@ export default {
             output.push(starship)
       }
        this.starshipsArray = output
+       this.showExtraInfoSpinner = false
     },
       getNum: function(url){
       const splittedUrl = url.split('/')

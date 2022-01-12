@@ -34,7 +34,7 @@ export default {
     props:['starships'],
     data(){
         return {
-            starship: null,
+            starship: {},
             currentArticle: 1
         }
     },

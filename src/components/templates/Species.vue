@@ -34,7 +34,7 @@ export default {
     props:['species'],
     data(){
         return {
-            specie: null,
+            specie: {},
             currentArticle: 1
         }
     },

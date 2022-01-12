@@ -33,7 +33,7 @@ export default {
     props:['vehicles'],
     data(){
         return {
-            vehicle: null,
+            vehicle: {},
             currentArticle: 1
         }
     },
