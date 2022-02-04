@@ -25,7 +25,6 @@ import {
   SET_LIST,
   SET_EXTRA_INFO_TYPE,
   SET_CHAR,
-  SET_CHAR_INDEX,
   RENDER_EXTRA_INFO,
   PLANET,
   VEHICLES,
@@ -36,7 +35,6 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    activeChar: null,
     showListSpinner: true,
     showExtraInfoSpinner: false,
     extraInfoType: "planet",
@@ -86,13 +84,10 @@ export default new Vuex.Store({
 
     setCharInfo(context, payload) {
       context.commit(SET_CHAR, payload.obj);
-      context.commit(SET_CHAR_INDEX, payload.index);
       context.dispatch(RENDER_EXTRA_INFO, PLANET);
     },
 
     async fetchPlanet(context, url) {
-      context.commit(SHOW_EXTRA_INFO_SPINNER);
-
       // const planetNum = this.getNum(url);
       const splittedUrl = url.split("/");
       const filteredUrl = splittedUrl.filter(
@@ -108,12 +103,9 @@ export default new Vuex.Store({
         // commit assign a new object value with key of planet number
         context.commit(SET_PLANETS, { obj: data, num: planetNum });
       }
-      context.commit(HIDE_EXTRA_INFO_SPINNER);
     },
 
     async fetchVehicles(context, urls) {
-      context.commit(SHOW_EXTRA_INFO_SPINNER);
-
       let output = [];
       for (let url of urls) {
         let vehicle = {};
@@ -136,11 +128,9 @@ export default new Vuex.Store({
       }
       // commit assign vehicles array to output
       context.commit(SET_VEHICLE_ARRAY, output);
-      context.commit(HIDE_EXTRA_INFO_SPINNER);
     },
 
     async fetchSpecies(context, urls) {
-      context.commit(SHOW_EXTRA_INFO_SPINNER);
       let output = [];
       for (let url of urls) {
         let specie = {};
@@ -162,11 +152,9 @@ export default new Vuex.Store({
         output.push(specie);
       }
       context.commit(SET_SPECIES_ARRAY, output);
-      context.commit(HIDE_EXTRA_INFO_SPINNER);
     },
 
     async fetchStarships(context, urls) {
-      context.commit(SHOW_EXTRA_INFO_SPINNER);
       let output = [];
       for (let url of urls) {
         let starship = {};
@@ -189,7 +177,6 @@ export default new Vuex.Store({
         output.push(starship);
       }
       context.commit(SET_STARSHIP_ARRAY, output);
-      context.commit(HIDE_EXTRA_INFO_SPINNER);
     },
     async handleNextPage(context) {
       context.commit(INCREMENT_PAGE);
@@ -209,6 +196,7 @@ export default new Vuex.Store({
     },
 
     async renderExtraInfo(context, type) {
+      context.commit(SHOW_EXTRA_INFO_SPINNER);
       if (!context.state.singleChar) {
         return;
       }
@@ -231,6 +219,7 @@ export default new Vuex.Store({
           await context.dispatch(FETCH_SPECIES, urlArray);
           break;
       }
+      context.commit(HIDE_EXTRA_INFO_SPINNER);
     },
   },
   mutations: {
@@ -271,9 +260,7 @@ export default new Vuex.Store({
     setChar(state, char) {
       state.singleChar = char;
     },
-    setCharIndex(state, index) {
-      state.activeChar = index;
-    },
+
     setPlanet(state, urlNum) {
       state.singlePlanet = state.planets[urlNum];
     },

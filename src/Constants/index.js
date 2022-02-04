@@ -27,7 +27,6 @@ export const SET_COUNT_AND_TOTAL_PAGES = "setCountAndTotalPages";
 export const SET_EXTRA_INFO_TYPE = "setExtraInfoType";
 export const SET_CHAR_INFO = "setCharInfo";
 export const SET_CHAR = "setChar";
-export const SET_CHAR_INDEX = "setCharIndex";
 export const PLANET = "planet";
 export const STARSHIPS = "starships";
 export const SPECIES = "species";

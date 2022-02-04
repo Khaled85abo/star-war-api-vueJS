@@ -10,7 +10,7 @@
 
         <ul v-else>
           <li
-            v-for="(char, i) in characters"
+            v-for="(char, i) in list"
             v-bind:key="i"
             v-on:click="renderCharInfo(char, i)"
             v-bind:class="{ active: activeChar == i }"
@@ -21,7 +21,7 @@
         <div class="page-controller">
           <button
             class="back-btn"
-            v-bind:disabled="$store.getters.backBtn"
+            v-bind:disabled="backBtn"
             v-on:click="handlePreviousPage"
           >
             ◀
@@ -31,7 +31,7 @@
           <span class="totalpages">{{ totalPages }}</span>
           <button
             class="forward-btn"
-            :disabled="$store.getters.forwardBtn"
+            :disabled="forwardBtn"
             @click="handleNextPage"
           >
             ▶
@@ -80,6 +80,7 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from "vuex";
 import RobotSvg from "@/components/RobotSvg.vue";
 import Spinner from "@/components/Spinner.vue";
 import ExtraInfoBtns from "@/components/ExtraInfoBtns.vue";
@@ -107,55 +108,41 @@ export default {
     StarshipsTemplate,
     VehiclesTemplate,
   },
+  data() {
+    return {
+      activeChar: null,
+    };
+  },
   methods: {
     handleNextPage() {
+      this.activeChar = null;
       this.$store.dispatch(HANDLE_NEXT_PAGE);
     },
     handlePreviousPage() {
+      this.activeChar = null;
       this.$store.dispatch(HANDEL_PREV_PAGE);
     },
     // Local method
     renderCharInfo(char, index) {
+      this.activeChar = index;
       this.$store.dispatch(SET_CHAR_INFO, { obj: char, index });
     },
   },
   computed: {
-    page() {
-      return this.$store.state.page;
-    },
-    totalPages() {
-      return this.$store.state.totalPages;
-    },
-    characters() {
-      return this.$store.state.list;
-    },
-    singleChar() {
-      return this.$store.state.singleChar;
-    },
-    showListSpinner() {
-      return this.$store.state.showListSpinner;
-    },
-    showExtraInfoSpinner() {
-      return this.$store.state.showExtraInfoSpinner;
-    },
-    extraInfoType() {
-      return this.$store.state.extraInfoType;
-    },
-    singlePlanet() {
-      return this.$store.state.singlePlanet;
-    },
-    speciesArray() {
-      return this.$store.state.speciesArray;
-    },
-    vehiclesArray() {
-      return this.$store.state.vehiclesArray;
-    },
-    starshipsArray() {
-      return this.$store.state.starshipsArray;
-    },
-    activeChar() {
-      return this.$store.state.activeChar;
-    },
+    ...mapState([
+      "page",
+      "list",
+      "totalPages",
+      "singleChar",
+      "showListSpinner",
+      "showExtraInfoSpinner",
+      "extraInfoType",
+      "singlePlanet",
+      "speciesArray",
+      "vehiclesArray",
+      "starshipsArray",
+    ]),
+    ...mapGetters(["backBtn", "forwardBtn"]),
   },
 
   mounted() {
